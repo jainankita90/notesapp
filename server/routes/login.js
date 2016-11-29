@@ -7,82 +7,68 @@ var secret = require('../config/secret');
 var redisClient = require('../config/redis_database').redisClient;
 var tokenManager = require('../config/token_manager');
 var routes = require('express').Router();
-/*
-var auth = function (req, res, next){
-  function unauthorized(res) {
-  	res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
-    return res.send(401);
-  };
-  
-  var user = basicAuth(req);
-
-  if (!user || !user.name || !user.pass) {
-    return unauthorized(res);
-  };
-
-   userdata = User.findOne({'user': user.name, 'pass': user.pass, 'isactive'= true});
-  if (userdata) {
-  	req.user = user;
-
-  	
-  	//console.log("user id " + req.session.user_id);
-    return next();
-  } else {
-    return unauthorized(res);
-  };
-};
-
-*/
 
 
 var User = require ('../models/User');
 
+routes.get('/status', function(req, res) {
+  if (1) {
+    return res.status(200).json({
+      status: false
+    });
+  }
+  res.status(200).json({
+    status: true
+  });
+});
 
 routes.post('/create', function(req, res){
-	console.log(req.body.username);
-	console.log(req.body.password);
-var username = req.body.username || '';
+	var username = req.body.username || '';
 	var password = req.body.password || '';
 	var passwordConfirmation = req.body.passwordConfirmation || '';
 
 	if (username == '' || password == '' || password != passwordConfirmation) {
-		return res.send(401);
+		return res.status(401).send({
+      	message: "please check username and pass"
+    	})
 	}
-console.log('username  :'+ username)
-	var newUser = new User();
+    console.log('username  :'+ username)
+	var newUser = {};
 	newUser.username = username;
-	newUser.setPassword(password);
-	newUser.save(function(err) {
-		if (err) {
-			console.log(err);
-			return res.send(500);
-		}
-	
-		User.count(function(err, counter) {
-			if (err) {
-				console.log(err);
-				return res.send(500);
-			}
+	newUser.password = password;
 
-			if (counter == 1) {
-				User.update({username:newUser.username}, {is_admin:true}, function(err, nbRow) {
-					if (err) {
-						console.log(err);
-						return res.send(500);
-					}
-
-					console.log('First user created as an Admin');
-					return res.send(200);
-				});
-			}
-			else {
-				console.log("User create=============================");
-				return res.send(200);
-			}
-		});
-	});
+	return res.send(User.CreateUser({'username':username}, newUser))
+// finding user, if doesnot 
+/*exist, create user
+	User.find({where: {username: username}})
+    .then(function(result){
+      if (!result){
+      	console.log(result);
+      	console.log(newUser);
+        User.create(newUser)
+        .then(function(user){
+        	console.log(user)
+          return res.status(200).send(user)
+        })
+        .catch(function(err){
+        	console.log(err)
+          return res.status(400).send({
+            message: err
+          })
+        });
+      }
+    })
+    .catch(function (err){
+    	console.log(err)
+      return res.status(400).send({
+        message: err
+        });
+    });*/
 });
-routes.post('/',function(req, res) {
+
+
+
+routes.post('/login',function(req, res) {
 	var username = req.body.username || '';
 	var password = req.body.password || '';
 
@@ -90,11 +76,9 @@ routes.post('/',function(req, res) {
 		return res.status(401).json({message: 'Please fill out all fields'});
 	}
     //db.userModel.setPassword(password);
-	User.findOne({username: username}, function (err, user) {
-		if (err) {
-			console.log(err);
-			return res.status(401).json({message: 'Please enter valid credentials'});
-		}
+	User.findOne({where: {username: username}})
+	.then(function (user) {
+		
 		if (user == undefined) {
 			return res.status(401).json({message: 'Please enter valid credentials'});
 		}
@@ -103,6 +87,10 @@ routes.post('/',function(req, res) {
 		}
 		var token = jwt.sign({id: user._id}, secret.secretToken, { expiresIn: tokenManager.TOKEN_EXPIRATION });
 		return res.json({token:token});
+	})
+	.catch(function(err){
+		console.log(err);
+		return res.status(401).json({message: 'Please enter valid credentials'});
 	});
 });
 
@@ -149,6 +137,32 @@ routes.post('/', auth, function(req, res){
 
 
 
+/*
+var auth = function (req, res, next){
+  function unauthorized(res) {
+  	res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
+    return res.send(401);
+  };
+  
+  var user = basicAuth(req);
+
+  if (!user || !user.name || !user.pass) {
+    return unauthorized(res);
+  };
+
+   userdata = User.findOne({'user': user.name, 'pass': user.pass, 'isactive'= true});
+  if (userdata) {
+  	req.user = user;
+
+  	
+  	//console.log("user id " + req.session.user_id);
+    return next();
+  } else {
+    return unauthorized(res);
+  };
+};
+
+*/
 
 
 // module.exports = {

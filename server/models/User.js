@@ -1,54 +1,139 @@
-var mongoose = require('mongoose');
+
+var Sequelize = require('sequelize');
+var sequelize = new Sequelize('meanapp', 'node', 'node', {
+  host: 'localhost',
+  dialect: 'postgres',
+
+  pool: {
+    max: 5,
+    min: 0,
+    idle: 10000
+  },
+
+  // SQLite only
+  
+});
+var owasp = require('owasp-password-strength-test');
 
 var crypto = require('crypto');
 var SALT_WORK_FACTOR = 10;
 
-// Create the MovieSchema.
-var UserSchema = new mongoose.Schema({
-  username: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  is_admin: {
-  	type: String,
-  	default : false
-  },
-  created_at:{
-  	type:Date,
-  	default: Date.now
-  },
-  salt: String,
-  hash: String,
+var setPassword = function(user) {
+  console.log("=========================================")
+  console.log(user)
+  console.log("=========================================")
+  var passwordTest = owasp.test(user.password);
+
+  console.log(passwordTest);
+
+
+  if (passwordTest.errors) {
+    var error = passwordTest.errors.join(' ');
+    throw new Error(error);
+  } else {
+    user.dataValues.salt = Crypto.randomBytes(16).toString('hex');
+    user.dataValues.hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64).toString('hex');
+  }
+};
+
+
+
+var findOrCreateUser  =  (function (condition, user){
+  User.find({where: condition})
+    .then(function(result){
+      if (!result){
+        console.log("=========================================")
+        console.log("heee")
+        console.log(user)
+        console.log("=========================================")
+         User.create(user)
+            .then(function(u){
+              console.log(u)
+              return {u}
+            })
+            .catch(function(err){
+            console.log(err)
+              return {
+              message: err
+            }
+        })
+        }
+        console.log('sdfsdf');
+      })
+    .catch(function (err){
+      console.log(err)
+      return {
+        message: err
+        }
+    })
 });
 
 
-UserSchema.methods.setPassword = function(password) {
-    this.salt = crypto.randomBytes(16).toString('hex');
 
-    this.hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64).toString('hex');
-};
+// Create the MovieSchema.
+var User = sequelize.define('User',{
+  username: {
+      allowNull: false,
+      type: Sequelize.STRING,
+      unique: true,
+      validate: {
+        notEmpty: true
+      }
+    },
+  is_admin: {
+    type: Sequelize.BOOLEAN,
+    defaultValue: false
+  },
+  salt: Sequelize.STRING,
+  hash: Sequelize.STRING,
+},{ 
+    classMethods: {
+      associate: function(models) {
+        User.hasMany(Note)
+      },
+      setPasswordtest: function(user){
+        console.log ( user)    
+        user.dataValues.salt = crypto.randomBytes(16).toString('hex');
+        console.log ("hashing1")
+        console.log("==========================")   
+        console.log(user.password)
+        console.log(user.salt) 
+        
+        console.log(crypto.pbkdf2Sync(user.username, user.salt, 1000, 64).toString('hex'))
+        user.dataValues.hash = crypto.pbkdf2Sync(user.username, user.salt, 1000, 64).toString('hex'); 
+        console.log ("hashing")    
+      },
+      CreateUser: function (cons, user){
+        return findOrCreateUser(cons, user)
+      }
+    },
 
-UserSchema.methods.validPassword = function(password) {
-    var hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64).toString('hex');
+    timestamps: true,
+    updatedAt: false,
+    instanceMethods: {
+      /**
+       * Authenticate
+       * @param  {[type]} user     [description]
+       * @param  {[type]} password [description]
+       * @return {[type]}          [description]
+       */
 
-    return this.hash === hash;
-};
 
-// Export the model schema.
-/*module.exports = UserSchema;*/
-var User = mongoose.model('User', UserSchema);
+      validPassword : function(password) {
+        var hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64).toString('hex');
+
+        return this.hash === hash;
+      }
+    }
+  }
+);
+
+User.beforeCreate(function(user, options) {
+  console.log ('beforecreate');
+  console.log ("hello ") 
+  console.log( user);
+  User.setPasswordtest(user);
+
+});
+User.sync();
 module.exports = User;
-
-
-
-/*var Post = new Schema({
-    title: { type: String, required: true },
-    tags: [ {type: String} ],
-    is_published: { type: Boolean, default: false },
-    content: { type: String, required: true },
-    created: { type: Date, default: Date.now },
-    updated: { type: Date, default: Date.now },
-    read: { type: Number, default: 0 },
-    likes: { type: Number, default: 0 }
-});*/

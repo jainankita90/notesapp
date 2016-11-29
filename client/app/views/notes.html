@@ -1,0 +1,28 @@
+<a class="btn btn-primary" href="/#/create/note"><span class="glyphicon glyphicon-plus"></span> New Note</a>
+<table class="table table-striped">
+<thead>
+	<th>Title</th>
+	<th>URL</th>
+	<th> Operations</th>
+</thead>
+<tbody>
+
+	<tr ng-repeat='n in notess'>
+		<td>
+			<a ng-href="/#/note/{{n.identifier}}"> {{n.sub}} </a>
+		</td>
+		<td> {{n.desc}} </td>
+		<td>
+			<div class = "button-group">
+				<a ng-href="/#/note/edit/{{n.identifier}}" class="btn btn-default">
+					<span class = "glyphicon glyphicon-edit"></span>
+				</a>
+				<a ng-href="/#/note/delete/{{n.identifier}}" class="btn btn-danger">
+					<span class = "glyphicon glyphicon-remove-circle"></span>
+				</a>
+			</div>
+		</td>
+	</tr>
+</tbody>
+</table>
+

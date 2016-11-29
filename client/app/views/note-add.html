@@ -1,0 +1,15 @@
+<form role="form">
+	<div class="form-group">
+		<label for="title" class="contol-label"> Title </label>
+		<input type="text" ng-model="note.sub" class="form-control" id="title" placeholder="Enter the Note title">
+	</div>
+<!-- ng-model assings value to scope varialble -->
+
+	<div class="form-group">
+			<label for="title" class="contol-label"> URL </label>
+			<input type="text" ng-model="note.desc" class="form-control" id="title" placeholder="Enter the youtube path">
+			<input type="submit" class="btn btn-primary" ng-click="saveNote()" value="Save">
+	</div>
+
+</form>
+	

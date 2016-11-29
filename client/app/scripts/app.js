@@ -26,30 +26,42 @@ angular
         controller: 'AboutCtrl',
         controllerAs: 'about'
       })
-      .when('/movies', {
-        templateUrl: 'views/movies.html',
-        controller: 'MoviesCtrl',
-        controllerAs: 'movies'
+      .when('/note', {
+        templateUrl: 'views/notes.html',
+        controller: 'NoteCtrl',
+        controllerAs: 'notes'
       })
-      .when('/movie/:id/delete', {
-        templateUrl: 'views/movie-delete.html',
-        controller: 'MovieDeleteCtrl',
-        controllerAs: 'movieDelete'
+      .when('/note/delete/:id', {
+        templateUrl: 'views/note-delete.html',
+        controller: 'NoteDeleteCtrl',
+        controllerAs: 'noteDelete'
       })
-      .when('/movie/:id', {
-        templateUrl: 'views/movie-view.html',
-        controller: 'MovieViewCtrl',
-        controllerAs: 'movieView'
+      .when('/note/:id', {
+        templateUrl: 'views/note-view.html',
+        controller: 'NoteViewCtrl',
+        controllerAs: 'noteView'
       })
-      .when('/create/movie', {
-        templateUrl: 'views/movie-add.html',
-        controller: 'MovieAddCtrl',
-        controllerAs: 'movieAdd'
+      .when('/create/note', {
+        templateUrl: 'views/note-add.html',
+        controller: 'NoteAddCtrl',
+        controllerAs: 'noteAdd'
       })
-      .when('/movie/:id/edit', {
-        templateUrl: 'views/movie-edit.html',
-        controller: 'MovieEditCtrl',
-        controllerAs: 'movieEdit'
+      .when('/note/edit/:id', {
+        templateUrl: 'views/note-edit.html',
+        controller: 'NoteEditCtrl',
+        controllerAs: 'noteEdit'
+      })
+      .when('/login',{
+        templateUrl: 'views/login.html',
+        controllerAs: 'LoginCtrl'
+      })
+      .when('/logout',{
+        controller: 'LogoutCtrl',
+        access: {restricted: false}
+      })
+      .when('/register',{
+        templateUrl: 'views/register.html',
+        controllerAs: 'RegisterCtrl'
       })
       .otherwise({
         redirectTo: '/'
@@ -57,17 +69,27 @@ angular
     })
 
   //changing name of fields since restapi gives _id as result
-    .factory('MovieRestangular', function(Restangular){
+    .factory('NoteRestangular', function(Restangular){
         return Restangular.withConfig(function(RestangularProvider){
         RestangularProvider.setRestangularFields({
-          'id': '_id'
+          'id': 'identifier',
         });
       });
     })
-    //ability to create new movie, service args 'movie' is url from restapi exressjs
-    .factory('Movie', function (MovieRestangular){
-      return MovieRestangular.service('movie');
-        //movie is server url
+    //ability to create new note, service args 'note' is url from restapi exressjs
+    .factory('Note', function (NoteRestangular){
+      return NoteRestangular.service('note');
+        //note is server url
+    })
+    .factory('UserRestangular', function(Restangular){
+        return Restangular.withConfig(function(RestangularProvider){
+        RestangularProvider.setRestangularFields({
+          'id': 'id',
+        });
+      });
+    })
+    .factory('User', function(UserRestangular){
+        return UserRestangular.service('user')
     })
     .directive('youtube', function(){
       return {
@@ -83,4 +105,3 @@ angular
           return $sce.trustAsResourceUrl (url);
       };
     });
-  

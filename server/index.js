@@ -15,7 +15,7 @@ app.use(methodOverride('X-HTTP-Method-Override'));
 // CORS Support
 app.use(function(req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+  res.header('Access-Control-Allow-Methods', 'OPTIONS HEAD GET,PUT,POST,DELETE,');
   res.header('Access-Control-Allow-Headers', 'Content-Type');
   next();
 });
@@ -38,8 +38,12 @@ app.use(function(req, res, next) {
   //  app.use(route, controller(app, route));
   //});
   app.use('/',routes);
-  app.use('/login',login);
-  app.use('/note',note);
+  app.use('/user/',login);
+  app.use('/note/',note);
+  //app.use('/*', function(req, res){
+  //  console.log("\n\n\n***********req recieved******************\n\n\n")
+  //  console.log(req)
+  //});
   console.log('Listening on port 3000...');
   app.listen(3000);
 
