@@ -14,14 +14,13 @@ angular.module('clientApp')
   	Note,
   	$location
   	) {
-    $scope.notess = Note.one($routeParams.id).get().$object;
-    $scope.deleteNote = function(){
-      console.log($scope.notess)
-    	$scope.notess.remove().then(function(){
-    		$location.path('/note');
-    	});
-    };
-    $scope.back = function(){
-    	$location.path('note/delete/' + $routeParams.id);
-    };
-  });
+       $scope.note = Note.one($routeParams.id).get().$object;
+      $scope.deleteNote = function() {
+        $scope.note.remove().then(function() {
+          $location.path('/note');
+        });
+      };
+      $scope.back = function() {
+        $location.path('/note/' + $routeParams.id);
+      };
+});

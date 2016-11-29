@@ -23,12 +23,7 @@ routes.get('/',function(req, res) {
  	});
 });
 
-routes.get('/create',function(req, res){
-  
-})
-
-
-routes.post('/add',function(req, res) {
+routes.post('/',function(req, res) {
 /*	if (!req.user) {
 		return res.send(401);
 	}
@@ -37,8 +32,8 @@ routes.post('/add',function(req, res) {
 	console.log(req.headers.username)
 	console.log(username)
 
-	var note = req.body.note;
-	console.log(note)
+	var note = req.body;
+	console.log("/PSOT///"+note)
 	if (note == null || note.sub == null || note.desc == null) {
 		return res.send(400);
 	}
@@ -79,31 +74,26 @@ console.log ("reoute.get "+id)
 });
 
 
-routes.delete("/:id", function (req, res){
-  console.log("------------delete called-------------------")
 
-});
-
-
-routes.get('/delete/:id',function(req, res) {
+routes.delete('/:id',function(req, res) {
 /*	if (!req.user) {
 		return res.send(401);
 	}
 */
 	var username = req.headers.username;
 	var id = req.params.id;
+
+  console.log("delete"+id)
 	if (id == null || id == '') {
 		res.send(400);
 	} 
 
-	var query = Note.findOne();
-
 	Note
     .findOne({
-      where: {'identifier':id, 'username': username},
-      include: [
+      where: {'identifier':id}//, 'username': username},
+//      include: [
         //db.User
-      ]
+//      ]
     })
     .then(function(note) {      
       note.destroy()
@@ -111,6 +101,7 @@ routes.get('/delete/:id',function(req, res) {
           return res.json(note);
         })
         .catch(function(err) {
+          console.log("error")
           return res.status(400).send({
             message: errorHandler.getErrorMessage(err)
           });
@@ -119,68 +110,66 @@ routes.get('/delete/:id',function(req, res) {
       return null;
     })
     .catch(function(err) {
+      console.log(err)
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
       });
     });
 });
 
-routes.put('/edit/:id',function(req, res) {
-/*	if (!req.user) {		return res.send(401);	}*/
-	var note = req.body.note;
+routes.put('/:id',function(req, res) {
+/*  if (!req.user) {    return res.send(401); }*/
+  var note = {}//req.body.note;
+  note.id = req.params.id;
+  note.desc = req.body.desc
 
-  console.log("params" )
-  console.log( note)
-	note.id = req.params.id;
+  if (note == null || note.id == null) {
+    console.log('bad request' + req.params.id )
+    res.send(400);
+  }
 
-	if (note == null || note.id == null) {
-		console.log('bad request' + req.params.id )
-		res.send(400);
-	}
+  var updateNote={}
+  updateNote.updatedAt = new Date();
+  updateNote.identifier = note.id
+  //_v pending
+  if (note.desc != null) {
+      updateNote.desc = note.desc;
+    }
+  
 
-	var updateNote={}
-	if (note.desc != null) {
-			updateNote.desc = note.desc;
-		}
-	
-		
-	updateNote.updatedAt = new Date();
-	//_v pending
-
-	console.log(updateNote)
+  console.log(updateNote)
   Note
     .findOne({
       where: {
         identifier: note.id
       },
-      include: [
+//      include: [
         //User
-      ]
+  //    ]
     })
-    .then(function(note) {
-      note.updateAttributes(updateNote)
-      	.then(function() {
-        	return res.json(note);
-      	})
-      	.catch(function(err) {
-      		console.log(err);
-        	return res.status(400).send({
-          	message: errorHandler.getErrorMessage(err)
-        	});
-      	});
+    .then(function(cnote) {
+      cnote.updateAttributes(updateNote)
+        .then(function() {
+          console.log(cnote)
+          return res.json(cnote);
+        })
+        .catch(function(err) {
+          console.log(err);
+          return res.status(400).send({
+            message: errorHandler.getErrorMessage(err)
+          });
+        });
 
-      	return null;
+        return null;
     })
     .catch(function(err) {
 
-    	console.log(err);
+      console.log(err);
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
       });
     });
 });
-
-
 //only if admin
 /*
 routes.get('/all',function(req, res) {
