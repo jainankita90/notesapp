@@ -29,15 +29,13 @@ routes.post('/',function(req, res) {
 	}
 
  	var username = req.session.user;
-	var note = req.body;
-  console.log(note)
-  console.log(note.sub)
-  console.log(note.desc)
+	var note = req.body.note;
+  
 	
 	if (note == null || note.sub == null || note.desc == null) {
 		return res.send(400);
 	}
-  console.log("came down")
+  
 	note.username = username;
 
 	Note.create(note)
@@ -45,7 +43,7 @@ routes.post('/',function(req, res) {
     	return res.json(note);
   	})
   	.catch(function(err) {
-      console.log(err)
+  
     	return res.status(400).send({
 
       		message: errorHandler.getErrorMessage(err)

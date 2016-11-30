@@ -28,7 +28,7 @@ var Note = sequelize.define('Note',{
     allowNull: true
   },
   id: { type: Sequelize.INTEGER, autoIncrement: true, primaryKey: true},
-  _v: {type: Sequelize.INTEGER, default:1}
+  _v: {type: Sequelize.INTEGER, defaultValue:1, allowNull: false}
 
 },{
   classMethods: {
