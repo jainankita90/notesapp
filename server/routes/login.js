@@ -67,25 +67,26 @@ routes.post('/create', function(req, res){
 });
 
 
-
-routes.post('/login',function(req, res) {
+routes.post('/',function(req, res) {
 	var username = req.body.username || '';
 	var password = req.body.password || '';
-
+	console.log('reached ------------login')
 	if (username == '' || password == '') { 
 		return res.status(401).json({message: 'Please fill out all fields'});
 	}
     //db.userModel.setPassword(password);
 	User.findOne({where: {username: username}})
 	.then(function (user) {
-		
+		console.log("hellouser"+ user==undefined )
+		console.log("hellov"+ user.validPassword(username))
 		if (user == undefined) {
 			return res.status(401).json({message: 'Please enter valid credentials'});
 		}
 		if(!user.validPassword(password)) {
 			return res.status(401).json({message: 'Please enter valid credentials'});
 		}
-		var token = jwt.sign({id: user._id}, secret.secretToken, { expiresIn: tokenManager.TOKEN_EXPIRATION });
+		var token = jwt.sign({id: username}, secret.secretToken, { expiresIn: tokenManager.TOKEN_EXPIRATION });
+		console.log(token)
 		return res.json({token:token});
 	})
 	.catch(function(err){

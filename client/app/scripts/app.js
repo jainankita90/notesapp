@@ -53,7 +53,8 @@ angular
       })
       .when('/login',{
         templateUrl: 'views/login.html',
-        controllerAs: 'LoginCtrl'
+        controllerAs: 'LoginCtrl',
+        controller: 'LoginCtrl'
       })
       .when('/logout',{
         controller: 'LogoutCtrl',
@@ -90,15 +91,6 @@ angular
     })
     .factory('User', function(UserRestangular){
         return UserRestangular.service('user')
-    })
-    .directive('youtube', function(){
-      return {
-        restrict : 'E', //restricted to the element 
-        scope: {
-          src: '='
-        },
-        templateUrl : 'views/youtube.html'
-      };
     })
     .filter('trusted', function($sce){
         return function(url){
