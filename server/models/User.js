@@ -19,12 +19,9 @@ var crypto = require('crypto');
 var SALT_WORK_FACTOR = 10;
 
 var setPassword = function(user) {
-  console.log("=========================================")
-  console.log(user)
-  console.log("=========================================")
+  
   var passwordTest = owasp.test(user.password);
 
-  console.log(passwordTest);
 
 
   if (passwordTest.errors) {
@@ -42,26 +39,21 @@ var findOrCreateUser  =  (function (condition, user){
   User.find({where: condition})
     .then(function(result){
       if (!result){
-        console.log("=========================================")
-        console.log("heee")
-        console.log(user)
-        console.log("=========================================")
+
          User.create(user)
             .then(function(u){
-              console.log(u)
               return {u}
             })
             .catch(function(err){
-            console.log(err)
               return {
               message: err
             }
         })
         }
-        console.log('sdfsdf');
+
       })
     .catch(function (err){
-      console.log(err)
+
       return {
         message: err
         }
@@ -70,7 +62,6 @@ var findOrCreateUser  =  (function (condition, user){
 
 
 
-// Create the MovieSchema.
 var User = sequelize.define('User',{
   username: {
       allowNull: false,
@@ -92,16 +83,13 @@ var User = sequelize.define('User',{
         User.hasMany(Note)
       },
       setPasswordtest: function(user){
-        console.log ( user)    
+            
         user.dataValues.salt = crypto.randomBytes(16).toString('hex');
-        console.log ("hashing1")
-        console.log("==========================")   
-        console.log(user.password)
-        console.log(user.salt) 
         
-        console.log(crypto.pbkdf2Sync(user.username, user.salt, 1000, 64).toString('hex'))
-        user.dataValues.hash = crypto.pbkdf2Sync(user.username, user.salt, 1000, 64).toString('hex'); 
-        console.log ("hashing")    
+        
+        
+        user.dataValues.hash = crypto.pbkdf2Sync(user.username, user.dataValues.salt, 1000, 64).toString('hex'); 
+        
       },
       CreateUser: function (cons, user){
         return findOrCreateUser(cons, user)
@@ -120,9 +108,11 @@ var User = sequelize.define('User',{
 
 
       validPassword : function(password) {
-        var hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64).toString('hex');
+        console.log(password);
+        console.log(this.dataValues)
+        var hash = crypto.pbkdf2Sync(password, this.dataValues.salt, 1000, 64).toString('hex');
 
-        return this.hash === hash;
+        return this.dataValues.hash === hash;
       }
     }
   }
